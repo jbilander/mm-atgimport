@@ -7,10 +7,11 @@
     <li>Fast MySQL-connection through socket-connection (app and db on same machine!)</li>
     <li>Thread-safe jobs</li>
     <li>Cronjobs in java using CronThreadPoolExecutor that extends ScheduledThreadPoolExecutor</li>
-    <li>CronExpression read from properties-file (easily changed)</li>
-    <li>Package with Maven 3 "package"-fetaure as a jar (mm-atgimport-1.0-SNAPSHOT.jar)</li>
+    <li>CronExpressions read from properties-file (easily changed)</li>
+    <li>Package with Maven 3 "package"-feature as a jar (mm-atgimport-1.0-SNAPSHOT.jar)</li>
     <li>Pure JDBC with Prepared Statements and transaction-handling/rollbacks</li>
     <li>Clean graceful shutdown-hook letting the ongoing jobs finish before exit</li>
+    <li>Simple logging to file with java.util.logging</li>
     <li>Run as a standalone application with:</li>
 </ul> 
 <pre>
