@@ -1,7 +1,6 @@
 package com.creang;
 
 import com.creang.common.Util;
-import com.creang.db.MiniConnectionPoolManager;
 import com.creang.logging.LoggerUtil;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,7 +19,6 @@ public class Main {
 
             try {
 
-                MiniConnectionPoolManager.getInstance().disposePool();
                 jobScheduler.getCronThreadPoolExecutor().shutdown();
 
                 while (activeJobsCount.get() > 0) {

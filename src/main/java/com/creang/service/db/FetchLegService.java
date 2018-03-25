@@ -1,8 +1,6 @@
 package com.creang.service.db;
 
 import com.creang.db.ConnectionPoolHelper;
-import com.creang.db.DbUtil;
-import com.creang.db.MiniConnectionPoolManager;
 import com.creang.model.Leg;
 
 import java.sql.Connection;
@@ -19,41 +17,33 @@ public class FetchLegService {
 
     private final Logger logger = loggerUtil.getLogger();
     private final ConnectionPoolHelper connectionPoolHelper = ConnectionPoolHelper.getInstance();
-    private final MiniConnectionPoolManager poolManager = connectionPoolHelper.getMiniConnectionPoolManager();
 
     public List<Leg> fetch(int raceCardId) {
 
         List<Leg> legs = new ArrayList<>();
 
-        Connection conn = null;
-        ResultSet rs = null;
-        PreparedStatement prepStmnt = null;
+        String sql = "select l.Id, l.RaceId, l.RaceCardId from leg l inner join race r on l.RaceId = r.Id where r.HasParticipants = 1 and l.RaceCardId = ? order by l.LegNumber";
 
-        try {
+        try (Connection conn = connectionPoolHelper.getDataSource().getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            conn = poolManager.getValidConnection(3);
+                ps.setInt(1, raceCardId);
 
-            prepStmnt = conn.prepareStatement("select l.Id, l.RaceId, l.RaceCardId from leg l inner join race r on l.RaceId = r.Id where r.HasParticipants = 1 and l.RaceCardId = ? order by l.LegNumber");
-            prepStmnt.setInt(1, raceCardId);
+                ResultSet rs = ps.executeQuery();
 
-            rs = prepStmnt.executeQuery();
+                while (rs != null && rs.next()) {
 
-            while (rs != null && rs.next()) {
-
-                Leg leg = new Leg();
-                leg.setId(rs.getInt(1));
-                leg.setRaceId(rs.getInt(2));
-                leg.setRaceCardId(rs.getInt(3));
-                legs.add(leg);
+                    Leg leg = new Leg();
+                    leg.setId(rs.getInt(1));
+                    leg.setRaceId(rs.getInt(2));
+                    leg.setRaceCardId(rs.getInt(3));
+                    legs.add(leg);
+                }
             }
-
         } catch (SQLException e) {
             logger.severe(e.getMessage());
-        } finally {
-            DbUtil.closeResultSet(rs);
-            DbUtil.closeStatement(prepStmnt);
-            poolManager.release(conn);
         }
+
         return legs;
     }
 }

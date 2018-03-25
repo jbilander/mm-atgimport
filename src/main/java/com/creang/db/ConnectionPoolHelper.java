@@ -5,12 +5,15 @@ import com.creang.common.Util;
 import org.mariadb.jdbc.MariaDbPoolDataSource;
 
 import java.sql.SQLException;
+import java.util.logging.Logger;
+
+import static com.creang.Main.loggerUtil;
 
 public enum ConnectionPoolHelper {
     INSTANCE;
 
+    private final Logger logger = loggerUtil.getLogger();
     private final MariaDbPoolDataSource dataSource = new MariaDbPoolDataSource();
-    private final MiniConnectionPoolManager miniConnectionPoolManager = MiniConnectionPoolManager.getInstance();
 
     ConnectionPoolHelper() {
 
@@ -30,17 +33,15 @@ public enum ConnectionPoolHelper {
                 dataSource.setUrl(Util.JDBC_URL_LINUX);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.severe(e.getMessage());
         }
-
-        miniConnectionPoolManager.setConnectionPoolDataSource(dataSource);
     }
 
     public static ConnectionPoolHelper getInstance() {
         return INSTANCE;
     }
 
-    public MiniConnectionPoolManager getMiniConnectionPoolManager() {
-        return miniConnectionPoolManager;
+    public MariaDbPoolDataSource getDataSource() {
+        return dataSource;
     }
 }

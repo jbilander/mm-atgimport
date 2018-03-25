@@ -1,7 +1,7 @@
 package com.creang.service.db;
 
 import com.creang.db.ConnectionPoolHelper;
-import com.creang.db.MiniConnectionPoolManager;
+import com.creang.db.DbUtil;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -16,32 +16,32 @@ public class DeleteRaceCardAndRaceService {
 
     private final Logger logger = loggerUtil.getLogger();
     private final ConnectionPoolHelper connectionPoolHelper = ConnectionPoolHelper.getInstance();
-    private final MiniConnectionPoolManager poolManager = connectionPoolHelper.getMiniConnectionPoolManager();
 
     public void delete(LocalDate localDate) {
 
-        String prepStmnt1 = "delete from racecard where RaceDayDate <= ?";
-        String prepStmnt2 = "delete from race where RaceDayDate <= ?";
+        String sql1 = "delete from racecard where RaceDayDate <= ?";
+        String sql2 = "delete from race where RaceDayDate <= ?";
+
         Connection conn = null;
 
         try {
 
-            conn = poolManager.getValidConnection(3);
+            conn = connectionPoolHelper.getDataSource().getConnection();
             conn.setAutoCommit(false);
 
-            try (PreparedStatement stmt1 = conn.prepareStatement(prepStmnt1)) {
-                try (PreparedStatement stmt2 = conn.prepareStatement(prepStmnt2)) {
+            try (PreparedStatement ps1 = conn.prepareStatement(sql1)) {
+                try (PreparedStatement ps2 = conn.prepareStatement(sql2)) {
 
-                    stmt1.setDate(1, Date.valueOf(localDate));
-                    stmt2.setDate(1, Date.valueOf(localDate));
-                    stmt1.executeUpdate();
-                    stmt2.executeUpdate();
+                    ps1.setDate(1, Date.valueOf(localDate));
+                    ps2.setDate(1, Date.valueOf(localDate));
+                    ps1.executeUpdate();
+                    ps2.executeUpdate();
                     conn.commit();
                 }
 
-            } catch (SQLException ex) {
+            } catch (SQLException e) {
                 conn.rollback();
-                logger.severe(ex.getMessage());
+                logger.severe(e.getMessage());
             }
 
             conn.setAutoCommit(true);
@@ -49,7 +49,7 @@ public class DeleteRaceCardAndRaceService {
         } catch (SQLException e) {
             logger.severe(e.getMessage());
         } finally {
-            poolManager.release(conn);
+            DbUtil.closeConnection(conn);
         }
     }
 }

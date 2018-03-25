@@ -1,7 +1,7 @@
 package com.creang.service.db;
 
 import com.creang.db.ConnectionPoolHelper;
-import com.creang.db.MiniConnectionPoolManager;
+import com.creang.db.DbUtil;
 import com.creang.model.Race;
 
 import java.sql.*;
@@ -14,36 +14,36 @@ public class InsertRaceService {
 
     private final Logger logger = loggerUtil.getLogger();
     private final ConnectionPoolHelper connectionPoolHelper = ConnectionPoolHelper.getInstance();
-    private final MiniConnectionPoolManager poolManager = connectionPoolHelper.getMiniConnectionPoolManager();
 
     public void insert(Set<Race> races) {
 
-        String prepStmnt1 = "insert ignore into race (RaceDayDate, PostTime, RaceNumber, AtgTrackId, AtgTrackCode, TrackName) values (?, ?, ?, ?, ?, ?)";
+        String sql = "insert ignore into race (RaceDayDate, PostTime, RaceNumber, AtgTrackId, AtgTrackCode, TrackName) values (?, ?, ?, ?, ?, ?)";
         Connection conn = null;
 
         try {
 
-            conn = poolManager.getValidConnection(3);
+            conn = connectionPoolHelper.getDataSource().getConnection();
             conn.setAutoCommit(false);
 
-            try (PreparedStatement stmt1 = conn.prepareStatement(prepStmnt1)) {
+            try (PreparedStatement ps1 = conn.prepareStatement(sql)) {
 
                 for (Race race : races) {
-                    stmt1.setDate(1, Date.valueOf(race.getRaceDayDate()));
-                    stmt1.setTime(2, Time.valueOf(race.getPostTime()));
-                    stmt1.setInt(3, race.getRaceNumber());
-                    stmt1.setInt(4, race.getAtgTrackId());
-                    stmt1.setString(5, race.getAtgTrackCode());
-                    stmt1.setString(6, race.getTrackName());
-                    stmt1.addBatch();
+
+                    ps1.setDate(1, Date.valueOf(race.getRaceDayDate()));
+                    ps1.setTime(2, Time.valueOf(race.getPostTime()));
+                    ps1.setInt(3, race.getRaceNumber());
+                    ps1.setInt(4, race.getAtgTrackId());
+                    ps1.setString(5, race.getAtgTrackCode());
+                    ps1.setString(6, race.getTrackName());
+                    ps1.addBatch();
                 }
 
-                stmt1.executeBatch();
+                ps1.executeBatch();
                 conn.commit();
 
-            } catch (SQLException ex) {
+            } catch (SQLException e) {
                 conn.rollback();
-                logger.severe(ex.getMessage());
+                logger.severe(e.getMessage());
             }
 
             conn.setAutoCommit(true);
@@ -51,7 +51,7 @@ public class InsertRaceService {
         } catch (SQLException e) {
             logger.severe(e.getMessage());
         } finally {
-            poolManager.release(conn);
+            DbUtil.closeConnection(conn);
         }
     }
 }

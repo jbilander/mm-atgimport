@@ -2,7 +2,6 @@ package com.creang.service.db;
 
 import com.creang.db.ConnectionPoolHelper;
 import com.creang.db.DbUtil;
-import com.creang.db.MiniConnectionPoolManager;
 import com.creang.model.Leg;
 import com.creang.model.RaceCard;
 
@@ -16,57 +15,57 @@ public class InsertRaceCardService {
 
     private final Logger logger = loggerUtil.getLogger();
     private final ConnectionPoolHelper connectionPoolHelper = ConnectionPoolHelper.getInstance();
-    private final MiniConnectionPoolManager poolManager = connectionPoolHelper.getMiniConnectionPoolManager();
 
     public void insert(Set<RaceCard> raceCards) {
 
-        String prepStmnt1 = "insert ignore into racecard (BetType, AtgTrackId, AtgTrackCode, RaceDayDate, HasBoost, TrackName) values (?, ?, ?, ?, ?, ?)";
-        String prepStmnt2 = "insert ignore into leg (RaceId, RaceCardId, LegNumber, LegName) values (?, ?, ?, ?)";
+        String sql1 = "insert ignore into racecard (BetType, AtgTrackId, AtgTrackCode, RaceDayDate, HasBoost, TrackName) values (?, ?, ?, ?, ?, ?)";
+        String sql2 = "insert ignore into leg (RaceId, RaceCardId, LegNumber, LegName) values (?, ?, ?, ?)";
 
         Connection conn = null;
-        ResultSet rs = null;
 
         try {
 
-            conn = poolManager.getValidConnection(3);
+            conn = connectionPoolHelper.getDataSource().getConnection();
             conn.setAutoCommit(false);
 
-            try (PreparedStatement stmt1 = conn.prepareStatement(prepStmnt1, Statement.RETURN_GENERATED_KEYS)) {
-                try (PreparedStatement stmt2 = conn.prepareStatement(prepStmnt2)) {
+            try (PreparedStatement ps1 = conn.prepareStatement(sql1, Statement.RETURN_GENERATED_KEYS)) {
+                try (PreparedStatement ps2 = conn.prepareStatement(sql2)) {
 
                     for (RaceCard raceCard : raceCards) {
 
-                        stmt1.setString(1, raceCard.getBetType());
-                        stmt1.setInt(2, raceCard.getAtgTrackId());
-                        stmt1.setString(3, raceCard.getAtgTrackCode());
-                        stmt1.setDate(4, Date.valueOf(raceCard.getRaceDayDate()));
-                        stmt1.setBoolean(5, raceCard.isHasBoost());
-                        stmt1.setString(6, raceCard.getTrackName());
-                        stmt1.executeUpdate();
+                        ps1.setString(1, raceCard.getBetType());
+                        ps1.setInt(2, raceCard.getAtgTrackId());
+                        ps1.setString(3, raceCard.getAtgTrackCode());
+                        ps1.setDate(4, Date.valueOf(raceCard.getRaceDayDate()));
+                        ps1.setBoolean(5, raceCard.isHasBoost());
+                        ps1.setString(6, raceCard.getTrackName());
+                        ps1.executeUpdate();
 
                         //add legs
-                        rs = stmt1.getGeneratedKeys();
+                        try (ResultSet rs = ps1.getGeneratedKeys()) {
 
-                        if (rs != null && rs.next()) {
+                            if (rs != null && rs.next()) {
 
-                            int id = rs.getInt(1);
+                                int id = rs.getInt(1);
 
-                            for (Leg leg : raceCard.getLegs()) {
-                                leg.setRaceCardId(id);
-                                stmt2.setInt(1, leg.getRaceId());
-                                stmt2.setInt(2, leg.getRaceCardId());
-                                stmt2.setInt(3, leg.getLegNumber());
-                                stmt2.setString(4, leg.getLegName());
-                                stmt2.addBatch();
+                                for (Leg leg : raceCard.getLegs()) {
+
+                                    leg.setRaceCardId(id);
+                                    ps2.setInt(1, leg.getRaceId());
+                                    ps2.setInt(2, leg.getRaceCardId());
+                                    ps2.setInt(3, leg.getLegNumber());
+                                    ps2.setString(4, leg.getLegName());
+                                    ps2.addBatch();
+                                }
+                                ps2.executeBatch();
                             }
-                            stmt2.executeBatch();
                         }
                     }
                     conn.commit();
                 }
-            } catch (SQLException ex) {
+            } catch (SQLException e) {
                 conn.rollback();
-                logger.severe(ex.getMessage());
+                logger.severe(e.getMessage());
             }
 
             conn.setAutoCommit(true);
@@ -74,8 +73,7 @@ public class InsertRaceCardService {
         } catch (SQLException e) {
             logger.severe(e.getMessage());
         } finally {
-            DbUtil.closeResultSet(rs);
-            poolManager.release(conn);
+            DbUtil.closeConnection(conn);
         }
     }
 }

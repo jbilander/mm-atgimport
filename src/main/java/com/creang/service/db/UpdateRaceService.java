@@ -2,7 +2,7 @@ package com.creang.service.db;
 
 import com.creang.common.Util;
 import com.creang.db.ConnectionPoolHelper;
-import com.creang.db.MiniConnectionPoolManager;
+import com.creang.db.DbUtil;
 import com.creang.model.Participant;
 import com.creang.model.Race;
 
@@ -18,25 +18,25 @@ public class UpdateRaceService {
 
     private final Logger logger = loggerUtil.getLogger();
     private final ConnectionPoolHelper connectionPoolHelper = ConnectionPoolHelper.getInstance();
-    private final MiniConnectionPoolManager poolManager = connectionPoolHelper.getMiniConnectionPoolManager();
 
     public void update(List<Race> races) {
 
-        String prepStmnt1 = "update race set Updated = ?, HasResult = ?, TrackState = ?, TrackSurface=?, WinTurnOver = ? where id = ?";
-        String prepStmnt2 = "update participant set Scratched = ?, DriverChanged = ?, WinnerOdds = ?, InvestmentWinner = ?, CardWeight = ?, CardWeightChanged = ? where id = ?";
-        String prepStmnt3 = "update horse set ForeShoes = ?, HindShoes = ? where id = ?";
-        String prepStmnt4 = "update driver set KeyId = ?, FirstName = ?, LastName = ?, ShortName = ?, Amateur = ?, ApprenticeAmateur = ?, ApprenticePro = ? where id = ?";
+        String sql1 = "update race set Updated = ?, HasResult = ?, TrackState = ?, TrackSurface=?, WinTurnOver = ? where id = ?";
+        String sql2 = "update participant set Scratched = ?, DriverChanged = ?, WinnerOdds = ?, InvestmentWinner = ?, CardWeight = ?, CardWeightChanged = ? where id = ?";
+        String sql3 = "update horse set ForeShoes = ?, HindShoes = ? where id = ?";
+        String sql4 = "update driver set KeyId = ?, FirstName = ?, LastName = ?, ShortName = ?, Amateur = ?, ApprenticeAmateur = ?, ApprenticePro = ? where id = ?";
+
         Connection conn = null;
 
         try {
 
-            conn = poolManager.getValidConnection(3);
+            conn = connectionPoolHelper.getDataSource().getConnection();
             conn.setAutoCommit(false);
 
-            try (PreparedStatement stmt1 = conn.prepareStatement(prepStmnt1)) {
-                try (PreparedStatement stmt2 = conn.prepareStatement(prepStmnt2)) {
-                    try (PreparedStatement stmt3 = conn.prepareStatement(prepStmnt3)) {
-                        try (PreparedStatement stmt4 = conn.prepareStatement(prepStmnt4)) {
+            try (PreparedStatement stmt1 = conn.prepareStatement(sql1)) {
+                try (PreparedStatement stmt2 = conn.prepareStatement(sql2)) {
+                    try (PreparedStatement stmt3 = conn.prepareStatement(sql3)) {
+                        try (PreparedStatement stmt4 = conn.prepareStatement(sql4)) {
 
                             for (Race race : races) {
 
@@ -65,6 +65,7 @@ public class UpdateRaceService {
                                     stmt3.addBatch();
 
                                     if (participant.isDriverChanged()) {
+
                                         stmt4.setInt(1, participant.getDriver().getKeyId());
                                         stmt4.setString(2, participant.getDriver().getFirstName());
                                         stmt4.setString(3, participant.getDriver().getLastName());
@@ -85,9 +86,9 @@ public class UpdateRaceService {
                         }
                     }
                 }
-            } catch (SQLException ex) {
+            } catch (SQLException e) {
                 conn.rollback();
-                logger.severe(ex.getMessage());
+                logger.severe(e.getMessage());
             }
 
             conn.setAutoCommit(true);
@@ -95,7 +96,7 @@ public class UpdateRaceService {
         } catch (SQLException e) {
             logger.severe(e.getMessage());
         } finally {
-            poolManager.release(conn);
+            DbUtil.closeConnection(conn);
         }
     }
 }
