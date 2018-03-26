@@ -66,9 +66,9 @@ public class InsertRaceCardService {
             } catch (SQLException e) {
                 conn.rollback();
                 logger.severe(e.getMessage());
+            } finally {
+                conn.setAutoCommit(true);
             }
-
-            conn.setAutoCommit(true);
 
         } catch (SQLException e) {
             logger.severe(e.getMessage());
