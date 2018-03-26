@@ -3,8 +3,8 @@
 <ul>
     <li>Java 9 with Modules</li>
     <li>Webservice client calls (polling with cronjobs) using JAX-WS in built-in SDK (java.xml.ws)</li>
-    <li>MiniConnectionPoolManager (using MariaDbPoolDataSource) mariadb jdbc-driver for MySQL</li>
-    <li>Fast MySQL-connection through socket-connection (app and db on same machine!)</li>
+    <li>Using MariaDbPoolDataSource in MariaDB Connector/J 2.2.3 jdbc-driver for MySQL</li>
+    <li>Fast MySQL-connection through localhost Unix-socket/Pipe-connection (Linux/Windows) (app and db on same machine!)</li>
     <li>Thread-safe jobs</li>
     <li>Cronjobs in java using CronThreadPoolExecutor that extends ScheduledThreadPoolExecutor</li>
     <li>CronExpressions read from properties-file (easily changed)</li>
