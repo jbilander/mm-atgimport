@@ -1,7 +1,6 @@
 package com.creang.service.db;
 
 import com.creang.db.ConnectionPoolHelper;
-import com.creang.db.DbUtil;
 import com.creang.model.Race;
 
 import java.sql.*;
@@ -18,27 +17,25 @@ public class InsertRaceService {
     public void insert(Set<Race> races) {
 
         String sql = "insert ignore into race (RaceDayDate, PostTime, RaceNumber, AtgTrackId, AtgTrackCode, TrackName) values (?, ?, ?, ?, ?, ?)";
-        Connection conn = null;
 
-        try {
+        try (Connection conn = connectionPoolHelper.getDataSource().getConnection()) {
 
-            conn = connectionPoolHelper.getDataSource().getConnection();
             conn.setAutoCommit(false);
 
-            try (PreparedStatement ps1 = conn.prepareStatement(sql)) {
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
                 for (Race race : races) {
 
-                    ps1.setDate(1, Date.valueOf(race.getRaceDayDate()));
-                    ps1.setTime(2, Time.valueOf(race.getPostTime()));
-                    ps1.setInt(3, race.getRaceNumber());
-                    ps1.setInt(4, race.getAtgTrackId());
-                    ps1.setString(5, race.getAtgTrackCode());
-                    ps1.setString(6, race.getTrackName());
-                    ps1.addBatch();
+                    ps.setDate(1, Date.valueOf(race.getRaceDayDate()));
+                    ps.setTime(2, Time.valueOf(race.getPostTime()));
+                    ps.setInt(3, race.getRaceNumber());
+                    ps.setInt(4, race.getAtgTrackId());
+                    ps.setString(5, race.getAtgTrackCode());
+                    ps.setString(6, race.getTrackName());
+                    ps.addBatch();
                 }
 
-                ps1.executeBatch();
+                ps.executeBatch();
                 conn.commit();
 
             } catch (SQLException e) {
@@ -50,8 +47,6 @@ public class InsertRaceService {
 
         } catch (SQLException e) {
             logger.severe(e.getMessage());
-        } finally {
-            DbUtil.closeConnection(conn);
         }
     }
 }

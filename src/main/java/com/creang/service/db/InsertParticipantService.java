@@ -2,7 +2,6 @@ package com.creang.service.db;
 
 import com.creang.common.Util;
 import com.creang.db.ConnectionPoolHelper;
-import com.creang.db.DbUtil;
 import com.creang.model.*;
 
 import java.sql.*;
@@ -27,11 +26,8 @@ public class InsertParticipantService {
         String sql7 = "insert into yearstat (HorseId, YearStatType, Earnings, First, Second, Third, NumberOfStarts, ShowPercentage, WinPercentage, Year) values (?,?,?,?,?,?,?,?,?,?)";
         String sql8 = "update race set PostTime = ?, RaceName = ?, LongDesc = ?, ShortDesc = ?, Distance = ?, StartMethod = ?, TrackSurface = ?, HasParticipants = ?, TrackState = ?, Monte = ?, Gallop = ?, Updated = ? where Id = ?";
 
-        Connection conn = null;
+        try (Connection conn = connectionPoolHelper.getDataSource().getConnection()) {
 
-        try {
-
-            conn = connectionPoolHelper.getDataSource().getConnection();
             conn.setAutoCommit(false);
 
             try (PreparedStatement ps1 = conn.prepareStatement(sql1, Statement.RETURN_GENERATED_KEYS)) {
@@ -192,7 +188,6 @@ public class InsertParticipantService {
                                                     }
                                                 }
                                             }
-                                            conn.commit();
                                         }
                                     }
                                 }
@@ -200,6 +195,7 @@ public class InsertParticipantService {
                         }
                     }
                 }
+                conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
                 logger.severe(e.getMessage());
@@ -209,8 +205,6 @@ public class InsertParticipantService {
 
         } catch (SQLException e) {
             logger.severe(e.getMessage());
-        } finally {
-            DbUtil.closeConnection(conn);
         }
     }
 }

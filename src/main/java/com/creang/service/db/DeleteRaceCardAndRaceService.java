@@ -1,7 +1,6 @@
 package com.creang.service.db;
 
 import com.creang.db.ConnectionPoolHelper;
-import com.creang.db.DbUtil;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -22,11 +21,8 @@ public class DeleteRaceCardAndRaceService {
         String sql1 = "delete from racecard where RaceDayDate <= ?";
         String sql2 = "delete from race where RaceDayDate <= ?";
 
-        Connection conn = null;
+        try (Connection conn = connectionPoolHelper.getDataSource().getConnection()) {
 
-        try {
-
-            conn = connectionPoolHelper.getDataSource().getConnection();
             conn.setAutoCommit(false);
 
             try (PreparedStatement ps1 = conn.prepareStatement(sql1)) {
@@ -36,8 +32,8 @@ public class DeleteRaceCardAndRaceService {
                     ps2.setDate(1, Date.valueOf(localDate));
                     ps1.executeUpdate();
                     ps2.executeUpdate();
-                    conn.commit();
                 }
+                conn.commit();
 
             } catch (SQLException e) {
                 conn.rollback();
@@ -48,8 +44,6 @@ public class DeleteRaceCardAndRaceService {
 
         } catch (SQLException e) {
             logger.severe(e.getMessage());
-        } finally {
-            DbUtil.closeConnection(conn);
         }
     }
 }

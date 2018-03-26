@@ -1,7 +1,6 @@
 package com.creang.service.db;
 
 import com.creang.db.ConnectionPoolHelper;
-import com.creang.db.DbUtil;
 import com.creang.model.Leg;
 import com.creang.model.RaceCard;
 
@@ -21,11 +20,8 @@ public class InsertRaceCardService {
         String sql1 = "insert ignore into racecard (BetType, AtgTrackId, AtgTrackCode, RaceDayDate, HasBoost, TrackName) values (?, ?, ?, ?, ?, ?)";
         String sql2 = "insert ignore into leg (RaceId, RaceCardId, LegNumber, LegName) values (?, ?, ?, ?)";
 
-        Connection conn = null;
+        try (Connection conn = connectionPoolHelper.getDataSource().getConnection()) {
 
-        try {
-
-            conn = connectionPoolHelper.getDataSource().getConnection();
             conn.setAutoCommit(false);
 
             try (PreparedStatement ps1 = conn.prepareStatement(sql1, Statement.RETURN_GENERATED_KEYS)) {
@@ -61,8 +57,8 @@ public class InsertRaceCardService {
                             }
                         }
                     }
-                    conn.commit();
                 }
+                conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
                 logger.severe(e.getMessage());
@@ -72,8 +68,6 @@ public class InsertRaceCardService {
 
         } catch (SQLException e) {
             logger.severe(e.getMessage());
-        } finally {
-            DbUtil.closeConnection(conn);
         }
     }
 }

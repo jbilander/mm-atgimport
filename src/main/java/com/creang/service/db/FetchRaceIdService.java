@@ -15,6 +15,7 @@ public class FetchRaceIdService {
 
     public Integer fetch(LocalDate raceDayDate, int atgTrackId, String atgTrackCode, int raceNumber) {
 
+        Integer id = null;
         String sql = "select Id from race where RaceDayDate = ? and AtgTrackId = ? and AtgTrackCode = ? and RaceNumber = ? limit 1";
 
         try (Connection conn = connectionPoolHelper.getDataSource().getConnection()) {
@@ -28,13 +29,13 @@ public class FetchRaceIdService {
                 ResultSet rs = ps.executeQuery();
 
                 if (rs != null && rs.next()) {
-                    return rs.getInt(1);
+                    id = rs.getInt(1);
                 }
             }
         } catch (SQLException e) {
             logger.severe(e.getMessage());
         }
 
-        return null;
+        return id;
     }
 }

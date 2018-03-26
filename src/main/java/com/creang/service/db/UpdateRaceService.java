@@ -2,7 +2,6 @@ package com.creang.service.db;
 
 import com.creang.common.Util;
 import com.creang.db.ConnectionPoolHelper;
-import com.creang.db.DbUtil;
 import com.creang.model.Participant;
 import com.creang.model.Race;
 
@@ -26,11 +25,8 @@ public class UpdateRaceService {
         String sql3 = "update horse set ForeShoes = ?, HindShoes = ? where id = ?";
         String sql4 = "update driver set KeyId = ?, FirstName = ?, LastName = ?, ShortName = ?, Amateur = ?, ApprenticeAmateur = ?, ApprenticePro = ? where id = ?";
 
-        Connection conn = null;
+        try (Connection conn = connectionPoolHelper.getDataSource().getConnection()) {
 
-        try {
-
-            conn = connectionPoolHelper.getDataSource().getConnection();
             conn.setAutoCommit(false);
 
             try (PreparedStatement stmt1 = conn.prepareStatement(sql1)) {
@@ -82,10 +78,10 @@ public class UpdateRaceService {
                             stmt3.executeBatch();
                             stmt2.executeBatch();
                             stmt1.executeBatch();
-                            conn.commit();
                         }
                     }
                 }
+                conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
                 logger.severe(e.getMessage());
@@ -95,8 +91,6 @@ public class UpdateRaceService {
 
         } catch (SQLException e) {
             logger.severe(e.getMessage());
-        } finally {
-            DbUtil.closeConnection(conn);
         }
     }
 }
