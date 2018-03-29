@@ -16,7 +16,7 @@ public class UpdateRaceAndRaceCardJob implements Runnable {
 
     private final Logger logger = loggerUtil.getLogger();
     private final AtomicBoolean lock = new AtomicBoolean();
-    private final UpdateRaceAndRaceCardTask updateRaceAndRaceCardTask = new UpdateRaceAndRaceCardTask();
+    private final UpdateRaceAndRaceCardTask updateRaceAndRaceCardTask = UpdateRaceAndRaceCardTask.getInstance();
     private final boolean todayJob;
 
     public UpdateRaceAndRaceCardJob(boolean todayJob) {

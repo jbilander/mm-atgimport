@@ -21,7 +21,8 @@ import java.util.stream.Collectors;
 
 import static com.creang.Main.loggerUtil;
 
-public class UpdateRaceAndRaceCardTask {
+public enum UpdateRaceAndRaceCardTask {
+    INSTANCE;
 
     private final Logger logger = loggerUtil.getLogger();
     private final AtgPartnerInfoService atgPartnerInfoService = new AtgPartnerInfoService();
@@ -31,7 +32,7 @@ public class UpdateRaceAndRaceCardTask {
     private final UpdateRaceService updateRaceService = new UpdateRaceService();
     private final UpdateRaceCardService updateRaceCardService = new UpdateRaceCardService();
 
-    public void run(LocalDate fromDate, LocalDate toDate) {
+    public synchronized void run(LocalDate fromDate, LocalDate toDate) {
 
         MyProperties properties = MyProperties.getInstance();
         LocalDate now = LocalDate.now(ZoneId.of(properties.getProperties().getProperty(Util.TIME_ZONE_KEY)));
@@ -474,5 +475,9 @@ public class UpdateRaceAndRaceCardTask {
                 }
             }
         }
+    }
+
+    public static UpdateRaceAndRaceCardTask getInstance() {
+        return INSTANCE;
     }
 }
