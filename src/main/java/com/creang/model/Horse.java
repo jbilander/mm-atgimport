@@ -20,7 +20,6 @@ public class Horse {
     private String color;
     private String blinkersType;
     private Integer rating;
-    private int startPoint;
     private List<Record> records;
     private List<YearStat> yearStats;
     private List<PastPerformance> pastPerformances;
@@ -135,14 +134,6 @@ public class Horse {
 
     public void setRating(Integer rating) {
         this.rating = rating;
-    }
-
-    public int getStartPoint() {
-        return startPoint;
-    }
-
-    public void setStartPoint(int startPoint) {
-        this.startPoint = startPoint;
     }
 
     public List<Record> getRecords() {

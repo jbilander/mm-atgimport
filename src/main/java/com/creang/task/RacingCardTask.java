@@ -117,7 +117,6 @@ public class RacingCardTask {
 
                     horse.setName(atgHorse.getHorseNameAndNationality());
                     horse.setAge(atgHorse.getAge());
-                    horse.setStartPoint(start.getStartPoint());
 
                     if (atgHorse.getSex() != null) {
                         horse.setGender(atgHorse.getSex().getCode());

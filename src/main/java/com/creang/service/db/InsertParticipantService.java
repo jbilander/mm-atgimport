@@ -20,7 +20,7 @@ public class InsertParticipantService {
         String sql1 = "insert into participant (RaceId, StartNumber, Distance, StartPosition, Scratched, DriverChanged, DriverColor, CardWeight, ConditionWeight, ParWeight1, ParWeight2, PlusNumberWeight) values (?,?,?,?,?,?,?,?,?,?,?,?)";
         String sql2 = "insert into driver (Id, KeyId, FirstName, LastName, ShortName, Amateur, ApprenticeAmateur, ApprenticePro) values (?,?,?,?,?,?,?,?)";
         String sql3 = "insert into trainer (Id, KeyId, FirstName, LastName, ShortName, Amateur, ApprenticeAmateur, ApprenticePro) values (?,?,?,?,?,?,?,?)";
-        String sql4 = "insert into horse (Id, KeyId, Name, Age, Gender, Sire, Dam, DamSire, HomeTrack, Color, BlinkersType, Rating, StartPoint) values (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        String sql4 = "insert into horse (Id, KeyId, Name, Age, Gender, Sire, Dam, DamSire, HomeTrack, Color, BlinkersType, Rating) values (?,?,?,?,?,?,?,?,?,?,?,?)";
         String sql5 = "insert into pastperformance (HorseId, Distance, Monte, GallopRace, StartPosition, ForeShoes, HindShoes, TrackState, DriverShortName, Earning, FirstPrize, FormattedTime, Odds, FormattedResult, Scratched, ScratchedReason, RaceDate, RaceNumber, AtgTrackCode, StartNumber, RaceTime, Blinkers, BlinkersType, Rating, TrackSurface, Weight) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         String sql6 = "insert into record (HorseId, RecordType, Place, Distance, AtgTrackCode, Winner, FormattedTime) values (?,?,?,?,?,?,?)";
         String sql7 = "insert into yearstat (HorseId, YearStatType, Earnings, First, Second, Third, NumberOfStarts, ShowPercentage, WinPercentage, Year) values (?,?,?,?,?,?,?,?,?,?)";
@@ -105,7 +105,6 @@ public class InsertParticipantService {
                                                                 ps4.setString(10, participant.getHorse().getColor());
                                                                 ps4.setString(11, participant.getHorse().getBlinkersType());
                                                                 ps4.setObject(12, participant.getHorse().getRating(), Types.INTEGER);
-                                                                ps4.setInt(13, participant.getHorse().getStartPoint());
                                                                 ps4.executeUpdate();
 
                                                                 for (PastPerformance pp : participant.getHorse().getPastPerformances()) {

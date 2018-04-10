@@ -122,7 +122,6 @@ create table `horse` (
 `Color` varchar(12) null,
 `BlinkersType` varchar(50) null,
 `Rating` int(11) null,
-`StartPoint` int(11) not null default 0,
 primary key (`Id`),
 foreign key (`Id`) references `participant` (`Id`) on delete cascade)
 engine=InnoDB default charset=utf8 collate=utf8_unicode_ci;
